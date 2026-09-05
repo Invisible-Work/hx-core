@@ -27,6 +27,7 @@ src/hx/
   providers/        # adapters de LLM (extras opcionais)
     anthropic.py
     openai.py
+    gemini.py
     __init__.py     # vazio de propósito
   memory/           # (futuro) drivers de memória
   context/          # (futuro) estratégias de contexto
@@ -38,7 +39,7 @@ tests/              # pytest
 ## Ambiente de desenvolvimento
 
 ```bash
-uv sync --extra anthropic --extra openai   # + dependency-group dev via uv sync --group dev se precisar
+uv sync --extra anthropic --extra openai --extra gemini   # + dependency-group dev via uv sync --group dev se precisar
 uv run pytest
 uv run ruff check .
 uv run mypy src
@@ -46,12 +47,13 @@ uv run mypy src
 
 Extras atuais:
 
-| Extra       | Pacote     | Módulo                         |
-|-------------|------------|--------------------------------|
-| `anthropic` | `anthropic`| `hx.providers.anthropic`       |
-| `openai`    | `openai`   | `hx.providers.openai`          |
+| Extra       | Pacote         | Módulo                         |
+|-------------|----------------|--------------------------------|
+| `anthropic` | `anthropic`    | `hx.providers.anthropic`       |
+| `openai`    | `openai`       | `hx.providers.openai`          |
+| `gemini`    | `google-genai` | `hx.providers.gemini`          |
 
-Variáveis de ambiente típicas: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`.
+Variáveis de ambiente típicas: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` / `GOOGLE_API_KEY`.
 
 Prova rápida dos providers:
 
@@ -168,14 +170,14 @@ Message(role="tool", content="42.0", tool_call_id="t1")
 
 #### Diferenças comuns entre vendors (o que o adapter esconde)
 
-| Tema | Anthropic | OpenAI (Responses) |
-|------|-----------|--------------------|
-| Chamada | `client.messages.create` | `client.responses.create` |
-| System | param `system=` | param `instructions=` |
-| Tool schema | `input_schema` | `parameters` (+ `type: "function"` plano) |
-| Tool call | bloco `tool_use`, `input` = dict | item `function_call`, `arguments` = JSON **string** |
-| Tool result | `role=user` + `tool_result` (agrupar consecutivos) | item `function_call_output` |
-| Stop | `stop_reason` | `status` + presença de `function_call` |
+| Tema | Anthropic | OpenAI (Responses) | Gemini (`google-genai`) |
+|------|-----------|--------------------|-------------------------|
+| Chamada | `client.messages.create` | `client.responses.create` | `client.aio.models.generate_content` |
+| System | param `system=` | param `instructions=` | `GenerateContentConfig.system_instruction` |
+| Tool schema | `input_schema` | `parameters` (+ `type: "function"` plano) | `FunctionDeclaration.parameters_json_schema` |
+| Tool call | bloco `tool_use`, `input` = dict | item `function_call`, `arguments` = JSON **string** | `Part.function_call`, `args` = dict (+ `id` opcional) |
+| Tool result | `role=user` + `tool_result` (agrupar consecutivos) | item `function_call_output` | `role=tool` + `function_response` (agrupar consecutivos) |
+| Stop | `stop_reason` | `status` + presença de `function_call` | `finish_reason` + presença de `function_call` |
 
 Ao adicionar um terceiro vendor, documente a linha equivalente nessa tabela mental e encapsule **tudo** no módulo do provider.
 

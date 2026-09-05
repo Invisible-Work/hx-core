@@ -1,7 +1,7 @@
 import importlib
 import sys
 
-PROIBIDOS = {"anthropic", "openai", "litellm", "mem0", "opentelemetry"}
+PROIBIDOS = {"anthropic", "openai", "google.genai", "litellm", "mem0", "opentelemetry"}
 NUCLEO = ["hx.types", "hx.errors", "hx.contracts", "hx.core", "hx.tools"]
 
 
