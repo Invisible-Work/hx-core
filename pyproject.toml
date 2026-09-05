@@ -1,0 +1,32 @@
+[project]
+name = "hx-core"
+version = "0.1.0"
+description = "Stop rewriting the agent loop. A small Python library with pluggable providers, memory drivers, and swappable context-engineering strategies — improve compaction once, every agent inherits it."
+readme = "README.md"
+authors = [
+    { name = "Gustavo Bodra", email = "bodra@invisiblework.io" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.13.5",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "hx"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pyyaml>=6.0.3",
+    "ruff>=0.16.6",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
